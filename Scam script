@@ -1,0 +1,140 @@
+local mt = getrawmetatable(game)
+local plr = game.Players.LocalPlayer
+local gfi = game.ReplicatedStorage.GetFullInventory
+local namecall = mt.__namecall
+local newindex = mt.__newindex
+setreadonly(mt,false)
+mt.__namecall = function(self,...)
+    local method = getnamecallmethod()
+    if method == "InvokeServer" and self == gfi then
+        local t = self.InvokeServer(self,...)
+        if t then
+            if t.Toys then
+                if t.Toys.Owned then
+                    for i,v in pairs(t.Toys.Owned) do
+                        table.insert(t.Emotes.Owned,v)
+                    end
+                end
+            end
+        end
+        return t
+    end
+    return namecall(self,...)
+end
+setreadonly(mt,true)
+game.UserInputService.InputBegan:Connect(function(a)
+    if a.KeyCode == Enum.KeyCode.LeftControl then
+        game.ReplicatedStorage.Remotes.Gameplay.FakeGun:FireServer(true)
+    end
+end)
+local avatarview = Instance.new("Frame")
+local mm2trash = Instance.new("ScreenGui")
+local epicness2 = Instance.new("ScrollingFrame")
+local Frame = Instance.new("Frame")
+local _1 = Instance.new("ImageButton")
+local _3 = Instance.new("ImageButton")
+local _2 = Instance.new("ImageButton")
+local UIListLayout = Instance.new("UIListLayout")
+local UICorner = Instance.new("UICorner")
+ 
+mm2trash.Parent = game.CoreGui
+ 
+avatarview.Name = "avatarview"
+avatarview.Parent = mm2trash
+avatarview.BackgroundColor3 = Color3.fromRGB(44, 44, 44)
+avatarview.Position = UDim2.new(0.0352408615, 0, 0.65988447, 0)
+avatarview.Size = UDim2.new(0, 360, 0, 222)
+avatarview.Visible = false
+avatarview.ZIndex = 10
+ 
+epicness2.Name = "epicness2"
+epicness2.Parent = avatarview
+epicness2.Active = true
+epicness2.BackgroundColor3 = Color3.fromRGB(44, 44, 44)
+epicness2.BorderSizePixel = 0
+epicness2.Position = UDim2.new(0.0142768025, 0, 0.0236890633, 0)
+epicness2.Size = UDim2.new(0, 349, 0, 210)
+epicness2.ScrollBarThickness = 8
+epicness2.ZIndex = 10
+ 
+Frame.BackgroundColor3 = Color3.fromRGB(44, 44, 44)
+Frame.BorderSizePixel = 0
+Frame.Size = UDim2.new(0, 311, 0, 100)
+Frame.ZIndex = 10
+ 
+_1.Name = "1"
+_1.Parent = Frame
+_1.BackgroundColor3 = Color3.fromRGB(44, 44, 44)
+_1.BorderSizePixel = 0
+_1.Position = UDim2.new(0.0216599926, 0, -0.0015860796, 0)
+_1.Size = UDim2.new(0, 90, 0, 90)
+_1.Image = ""
+_1.ZIndex = 10
+ 
+_3.Name = "3"
+_3.Parent = Frame
+_3.BackgroundColor3 = Color3.fromRGB(44, 44, 44)
+_3.BorderSizePixel = 0
+_3.Position = UDim2.new(0.684039474, 0, -0.0015860796, 0)
+_3.Size = UDim2.new(0, 90, 0, 90)
+_3.Image = ""
+_3.ZIndex = 10
+ 
+_2.Name = "2"
+_2.Parent = Frame
+_2.BackgroundColor3 = Color3.fromRGB(44, 44, 44)
+_2.BorderSizePixel = 0
+_2.Position = UDim2.new(0.352849722, 0, -0.0015860796, 0)
+_2.Size = UDim2.new(0, 90, 0, 90)
+_2.Image = ""
+_2.ZIndex = 10
+ 
+UIListLayout.Parent = epicness2
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+ 
+UICorner.Parent = avatarview
+ 
+UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+    epicness2.CanvasSize = UDim2.new(0,0,0,UIListLayout.AbsoluteContentSize.Y)
+end)
+local function format(thing)
+    if tonumber(thing) then
+    	local formatted = "http://www.roblox.com/Thumbs/Asset.ashx?format=png&width=250&height=250&assetId=" ..tostring(thing).. "&bust=" .. math.random(1, 10000);
+    	return formatted
+    else
+        return thing
+    end
+end;
+local f = Frame:Clone()
+f.Parent = epicness2
+local num = 0
+local function crap(a,b)
+    if a == "Emotes" then
+        local exists = getrenv()._G.Database.Toys[b] ~= nil
+        if exists == true then return true end
+    end
+    return false
+end
+for i,v in pairs({"Toys","Emotes","Radios","Effects","Perks"}) do
+    for i2,v2 in pairs(getrenv()._G.PlayerData[v].Owned) do
+        if not crap(v,v2) then
+            num = num + 1
+            local shit = getrenv()._G.Database[v][v2]
+            local thing = f[tostring(num)]
+            thing.Image = format(shit.Image)
+            if num%3==0 then
+                num = 0
+                f = Frame:Clone()
+                f.Parent = epicness2
+            end
+            thing.Tap:Connect(function()
+                game.ReplicatedStorage.Trade.OfferItem:FireServer(v2,v)
+            end)
+        end
+    end
+end
+game.UserInputService.InputBegan:Connect(function(a)
+    if a.KeyCode == Enum.KeyCode.BackSlash then
+        avatarview.Visible = not avatarview.Visible
+    end
+end)
